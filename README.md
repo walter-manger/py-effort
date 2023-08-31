@@ -1,6 +1,6 @@
 # Py-Effort
 
-`py-effort` is a small script that queries jira cloud to distribute effort across the **Initiatives**, **Epics**, and **Stories**.
+`py-effort` is a small script that queries jira cloud to distribute effort across the **Initiatives**, **Epics**, and **Stories** for a given user and time period.
 
 ## Prerequisites
 
