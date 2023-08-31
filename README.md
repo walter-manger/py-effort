@@ -4,6 +4,7 @@
 
 ## Prerequisites
 
+> **Warning**
 > This project was built using python 3.8.16. Use other versions at your own risk.
 
 Install Dependencies
