@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from models import Vapp, wrangle_no_epic_stories
 from output import print_header, print_summary, print_vapps
 from api_requests import JiraClient
+from rich.console import Console
+
 
 load_dotenv()
 for v in ["JIRA_USER", "JIRA_TOKEN", "JIRA_SUBDOMAIN"]:
@@ -42,6 +44,8 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
+    console = Console()
+
     total_days = int(np.busday_count(args.start, args.end))
     total_percent = 100 - (args.pto / total_days * 100)
 
@@ -50,16 +54,26 @@ if __name__ == "__main__":
         os.getenv("JIRA_USER"), os.getenv("JIRA_TOKEN"), os.getenv("JIRA_SUBDOMAIN")
     )
 
+    sprint_names = []
+
     # Get all sprints, then filter between start_date and end_date
-    sprints = client.get_sprints(args.start, args.end)
-    sprint_names = [s.name for s in sprints]
+    with console.status("Getting Sprints...", spinner="runner"):
+        sprints = client.get_sprints(args.start, args.end)
+        sprint_names = [s.name for s in sprints]
+
+    stories = []
+    total_story_points = 0
 
     # Get all stories filtered by user and sprints
-    stories, total_story_points = client.get_stories(args.user, sprint_names)
+    with console.status("Getting Stories...", spinner="runner"):
+        stories, total_story_points = client.get_stories(args.user, sprint_names)
+
+    epics = []
 
     # Get all epics that match the story epic keys
-    epic_keys = list(set([k.parent.key for k in stories]))
-    epics = client.get_epics([k for k in epic_keys if k != ""], stories)
+    with console.status("Getting Epics...", spinner="runner"):
+        epic_keys = list(set([k.parent.key for k in stories]))
+        epics = client.get_epics([k for k in epic_keys if k != ""], stories)
 
     # Create vapps from the epics to build out the full tree
     vapp_keys = list(set([k.parent.key for k in epics]))

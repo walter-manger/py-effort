@@ -32,8 +32,6 @@ class JiraClient:
         max_results = 50
         start_at = 0
 
-        print("Getting Sprints....")
-
         # We have to loop through results because the API doesn't allow filtering by dates.
         # https://jira.atlassian.com/browse/JRACLOUD-72007
         while not is_last:
@@ -61,7 +59,6 @@ class JiraClient:
         """
         Gets a list of Stories from the Jira Cloud API.
         """
-        print("Getting Stories....")
         quoted_sprint_names = ",".join([f'"{s}"' for s in sprint_names])
 
         response = self._make_request(
@@ -85,7 +82,6 @@ class JiraClient:
         """
         Gets a list of Epics from the Jira Cloud API.
         """
-        print("Getting Epics....")
 
         response = self._make_request(
             url="api/3/search",
