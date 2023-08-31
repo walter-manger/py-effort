@@ -31,7 +31,13 @@ parser.add_argument(
     type=int,
     default=0,
 )
-parser.add_argument("--details", default=False, action="store_true")
+parser.add_argument(
+    "-d",
+    "--details",
+    default=False,
+    action="store_true",
+    help="show the details section",
+)
 args = parser.parse_args()
 
 

@@ -33,3 +33,20 @@ JIRA_SUBDOMAIN=
 ``` sh
 python py-effort "Jeff Bezos" "2023-07-10" "2023-08-18" 0
 ```
+
+See the required arguments
+
+``` sh
+python py-effort -h
+usage: py-effort [-h] [-d] user start end pto
+
+positional arguments:
+  user           the user's name you running the report for
+  start          the start date in YYYY-MM-DD format
+  end            the end date in YYYY-MM-DD format
+  pto            the pto days the user has taken between start and end
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -d, --details  show the details section
+```
