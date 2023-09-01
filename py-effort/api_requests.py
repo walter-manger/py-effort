@@ -24,27 +24,45 @@ class JiraClient:
             auth=self.auth,
         )
 
+    def _get_all_pages(
+        self,
+        url: str = "",
+        params: Dict = {"maxResults": 50, "startAt": 0},
+        collection_key="issues",
+    ) -> List[Dict]:
+        is_last = False
+        collection = []
+        max_results = "maxResults" in params and params["maxResults"] or 50
+        start_at = "startAt" in params and params["startAt"] or 0
+
+        while not is_last:
+            response = self._make_request(
+                url=url,
+                params=params,
+            )
+            r = json.loads(response.text)
+            collection.extend(r[collection_key])
+
+            is_last = ("isLast" in r and r["isLast"]) or (
+                "total" in r and r["total"] < start_at + max_results
+            )
+            if not is_last:
+                start_at = max_results + start_at
+                params["startAt"] = start_at
+                print(f"url: {url}, start_at: {start_at}")
+
+        return collection
+
     def get_sprints(
         self, start_date: datetime.datetime, end_date: datetime.datetime
     ) -> List[Sprint]:
-        is_last = False
-        sprints = []
-        max_results = 50
-        start_at = 0
-
         # We have to loop through results because the API doesn't allow filtering by dates.
         # https://jira.atlassian.com/browse/JRACLOUD-72007
-        while not is_last:
-            response = self._make_request(
-                url="agile/1.0/board/485/sprint",
-                params={"maxResults": max_results, "startAt": start_at},
-            )
-            sprints_response = json.loads(response.text)
-            sprints.extend([Sprint(v) for v in sprints_response["values"]])
-            is_last = sprints_response["isLast"]
-            if not is_last:
-                start_at = start_at + max_results
+        collection = self._get_all_pages(
+            url="agile/1.0/board/485/sprint", collection_key="values"
+        )
 
+        sprints = [Sprint(v) for v in collection]
         filtered_sprints = [
             s for s in sprints if s.start_date >= start_date and s.end_date <= end_date
         ]
@@ -61,16 +79,16 @@ class JiraClient:
         """
         quoted_sprint_names = ",".join([f'"{s}"' for s in sprint_names])
 
-        response = self._make_request(
+        collection = self._get_all_pages(
             url="api/3/search",
             params={
                 "jql": f'assignee = "{assignee}" AND issueType = Story AND sprint in ({quoted_sprint_names})',
                 "fields": "summary,key,status,assignee,updated,issuetype,parent,customfield_11200,customfield_12488,customfield_10004,customfield_10007",
-                "maxResults": "50",
             },
+            collection_key="issues",
         )
-        stories_response = json.loads(response.text)
-        stories = [Issue(s) for s in stories_response["issues"]]
+
+        stories = [Issue(s) for s in collection]
 
         all_story_points = 0
         for s in stories:
@@ -83,13 +101,13 @@ class JiraClient:
         Gets a list of Epics from the Jira Cloud API.
         """
 
-        response = self._make_request(
+        collection = self._get_all_pages(
             url="api/3/search",
             params={
                 "jql": f'key in ({",".join(epic_keys)})',
                 "fields": "summary,key,status,assignee,updated,issuetype,parent,customfield_11200,customfield_12488,customfield_10004,customfield_10007",
-                "maxResults": "50",
             },
+            collection_key="issues",
         )
-        epics_response = json.loads(response.text)
-        return [Epic(e, stories) for e in epics_response["issues"]]
+
+        return [Epic(e, stories) for e in collection]
