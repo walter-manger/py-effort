@@ -50,7 +50,10 @@ class Epic(IssueBase):
 
         epicStoryPoints = 0
         for s in epic_stories:
-            epicStoryPoints += s.storyPoints
+            if s.storyPoints:
+                epicStoryPoints += s.storyPoints
+            else:
+                print("found a story {} without a storyPoint value".format(s.key))
         self.storyPoints = epicStoryPoints
 
     def __str__(self) -> str:

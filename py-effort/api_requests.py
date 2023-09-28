@@ -92,7 +92,10 @@ class JiraClient:
 
         all_story_points = 0
         for s in stories:
-            all_story_points += s.storyPoints
+            if s.storyPoints:
+                all_story_points += s.storyPoints
+            else:
+                print("found a story {} without a storyPoint value".format(s.key))
 
         return stories, all_story_points
 
