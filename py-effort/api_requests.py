@@ -6,12 +6,12 @@ from requests.auth import HTTPBasicAuth
 from requests.models import Response
 from models import Sprint, Epic, Issue
 
-
 class JiraClient:
-    def __init__(self, jira_user: str, jira_token: str, jira_subdomain: str):
+    def __init__(self, jira_user: str, jira_token: str, jira_subdomain: str, board_id: int):
         self.base_url = f"https://{jira_subdomain}.atlassian.net/rest/"
         self.auth = HTTPBasicAuth(jira_user, jira_token)
         self.headers = {"Accept": "application/json"}
+        self.board_id = board_id
 
     def _make_request(
         self, method: str = "GET", url: str = "", params: Dict = {"maxResults": 50}
@@ -59,7 +59,7 @@ class JiraClient:
         # We have to loop through results because the API doesn't allow filtering by dates.
         # https://jira.atlassian.com/browse/JRACLOUD-72007
         collection = self._get_all_pages(
-            url="agile/1.0/board/485/sprint", collection_key="values"
+            url=f"agile/1.0/board/{self.board_id}/sprint", collection_key="values"
         )
 
         sprints = [Sprint(v) for v in collection]

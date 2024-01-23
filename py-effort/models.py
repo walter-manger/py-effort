@@ -88,10 +88,18 @@ class Sprint:
 
         self.id = value["id"]
         self.name = value["name"]
-        self.start_date = datetime.datetime.strptime(
-            value["startDate"], date_format
-        ).date()
-        self.end_date = datetime.datetime.strptime(value["endDate"], date_format).date()
+
+        # sometimes there are no startDate and endDate values
+        # In this case, let's just make those values unmeaningful
+        if 'startDate' in value and 'endDate' in value:
+            self.start_date = datetime.datetime.strptime(
+                value["startDate"], date_format
+            ).date()
+            self.end_date = datetime.datetime.strptime(value["endDate"], date_format).date()
+        else:
+            self.start_date = datetime.date.today()
+            self.end_date = datetime.date.today()
+
 
 
 def wrangle_no_epic_stories(vapps: List[Vapp], stories: List[Issue]):

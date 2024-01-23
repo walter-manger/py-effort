@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # Setup the JiraClient
     client = JiraClient(
-        os.getenv("JIRA_USER"), os.getenv("JIRA_TOKEN"), os.getenv("JIRA_SUBDOMAIN")
+        os.getenv("JIRA_USER"), os.getenv("JIRA_TOKEN"), os.getenv("JIRA_SUBDOMAIN"), os.getenv("JIRA_BOARD_ID")
     )
 
     sprint_names = []
