@@ -12,7 +12,7 @@ from rich.console import Console
 
 
 load_dotenv()
-for v in ["JIRA_USER", "JIRA_TOKEN", "JIRA_SUBDOMAIN"]:
+for v in ["JIRA_USER", "JIRA_TOKEN", "JIRA_SUBDOMAIN", "JIRA_BOARD_ID"]:
     if not os.getenv(v):
         raise Exception(f"{v} must be in .env")
 
@@ -49,6 +49,8 @@ if __name__ == "__main__":
     total_days = int(np.busday_count(args.start, args.end))
     total_percent = 100 - (args.pto / total_days * 100)
 
+    console.print(f"🎲 Running a report for {args.user} in JIRA_BOARD_ID {os.getenv('JIRA_BOARD_ID')}", style="bold green")
+
     # Setup the JiraClient
     client = JiraClient(
         os.getenv("JIRA_USER"), os.getenv("JIRA_TOKEN"), os.getenv("JIRA_SUBDOMAIN"), os.getenv("JIRA_BOARD_ID")
@@ -67,6 +69,11 @@ if __name__ == "__main__":
     # Get all stories filtered by user and sprints
     with console.status("Getting Stories...", spinner="runner"):
         stories, total_story_points = client.get_stories(args.user, sprint_names)
+
+
+    if len(stories) == 0:
+        console.print(f"😟 No stories found for {args.user} in that date range, are you sure you have the correct JIRA_BOARD_ID?", style="bold red")
+        exit()
 
     epics = []
 
