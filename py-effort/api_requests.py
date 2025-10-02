@@ -80,7 +80,7 @@ class JiraClient:
         quoted_sprint_names = ",".join([f'"{s}"' for s in sprint_names])
 
         collection = self._get_all_pages(
-            url="api/3/search",
+            url="api/3/search/jql",
             params={
                 "jql": f'assignee = "{assignee}" AND issueType = Story AND sprint in ({quoted_sprint_names})',
                 "fields": "summary,key,status,assignee,updated,issuetype,parent,customfield_11200,customfield_12488,customfield_10004,customfield_10007",
@@ -105,7 +105,7 @@ class JiraClient:
         """
 
         collection = self._get_all_pages(
-            url="api/3/search",
+            url="api/3/search/jql",
             params={
                 "jql": f'key in ({",".join(epic_keys)})',
                 "fields": "summary,key,status,assignee,updated,issuetype,parent,customfield_11200,customfield_12488,customfield_10004,customfield_10007",
